@@ -51,8 +51,6 @@ services:
     depends_on:
       - postgres
       - redis
-      - kiosc-taskflow
-      - irods
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.xforward.headers.customrequestheaders.X-Forwarded-Proto=https"
