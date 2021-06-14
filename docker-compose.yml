@@ -1,0 +1,113 @@
+version: "3.8"
+
+# Define default configuration for Kiosc Servers.
+x-kiosc: &default-kiosc
+  image: ghcr.io/bihealth/kiosc-server:${KIOSC_SERVER_VERSION}
+  environment: &default-kiosc-environment
+    WAIT_HOSTS: "postgres:5432, redis:6379"
+    LC_ALL: en_US.UTF-8
+    CELERY_BROKER_URL: redis://redis:6379/0
+    DATABASE_URL: postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}/kiosc
+  networks:
+    - kiosc
+  restart: unless-stopped
+  volumes:
+    - type: bind
+      source: /var/run/docker.sock
+      target: /var/run/docker.sock
+      read_only: false
+
+services:
+  traefik:
+    image: traefik:v2.3.1
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - kiosc
+    restart: unless-stopped
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+    volumes:
+      - type: bind
+        source: ./volumes/traefik/letsencrypt
+        target: /letsencrypt
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+
+  kiosc-web:
+    <<: *default-kiosc
+    networks:
+      - kiosc
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+      - kiosc-taskflow
+      - irods
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.xforward.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.routers.kiosc-web.entrypoints=web,websecure"
+      - "traefik.http.routers.kiosc-web.middlewares=xforward"
+      - "traefik.http.routers.kiosc-web.rule=HostRegexp(`{catchall:.+}`)"
+      - "traefik.http.services.kiosc-web.loadbalancer.server.port=8080"
+      - "traefik.http.routers.kiosc-web.tls=true"
+
+  kiosc-celerybeat:
+    <<: *default-kiosc
+    command: ["celerybeat"]
+    networks:
+      - kiosc
+    depends_on:
+      - kiosc-web
+    restart: unless-stopped
+
+  kiosc-celeryd-default:
+    <<: *default-kiosc
+    command: ["celeryd"]
+    environment:
+      <<: *default-kiosc-environment
+      CELERY_QUEUES: default
+      CELERY_WORKERS: 16
+    depends_on:
+      - kiosc-web
+    networks:
+      - kiosc
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:12
+    environment:
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: kiosc
+    networks:
+      - kiosc
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: ./volumes/postgres/data
+        target: /var/lib/postgresql/data
+
+  redis:
+    image: redis:6
+    networks:
+      - kiosc
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: ./volumes/redis/data
+        target: /data
+
+networks:
+  kiosc:
