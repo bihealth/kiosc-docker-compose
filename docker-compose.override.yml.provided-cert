@@ -12,9 +12,6 @@ services:
       - "--providers.file.watch=true"
     volumes:
       - type: bind
-        source: ./volumes/traefik/letsencrypt
-        target: /letsencrypt
-      - type: bind
         source: /var/run/docker.sock
         target: /var/run/docker.sock
         read_only: true
