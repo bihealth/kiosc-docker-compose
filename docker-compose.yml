@@ -8,6 +8,9 @@ x-kiosc: &default-kiosc
     LC_ALL: en_US.UTF-8
     CELERY_BROKER_URL: redis://redis:6379/0
     DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}/kiosc
+    KIOSC_NETWORK_MODE: ${KIOSC_NETWORK_MODE}
+    KIOSC_DOCKER_NETWORK: ${KIOSC_DOCKER_NETWORK}
+    KIOSC_DOCKER_WEB_SERVER: ${KIOSC_DOCKER_WEB_SERVER}
   networks:
     - kiosc
   restart: unless-stopped
