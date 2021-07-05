@@ -6,12 +6,8 @@ x-kiosc: &default-kiosc
   environment: &default-kiosc-environment
     WAIT_HOSTS: "postgres:5432, redis:6379"
     LC_ALL: en_US.UTF-8
-    CELERY_BROKER_URL: redis://redis:6379/0
-    DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}/kiosc
-    KIOSC_NETWORK_MODE: ${KIOSC_NETWORK_MODE}
-    KIOSC_DOCKER_NETWORK: ${KIOSC_DOCKER_NETWORK}
-    KIOSC_DOCKER_WEB_SERVER: ${KIOSC_DOCKER_WEB_SERVER}
-    PROJECTROLES_SITE_MODE: ${PROJECTROLES_SITE_MODE}
+  env_file:
+    - .env
   networks:
     - kiosc
   restart: unless-stopped
