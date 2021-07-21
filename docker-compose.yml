@@ -9,7 +9,7 @@ x-kiosc: &default-kiosc
   env_file:
     - .env
   networks:
-    - kiosc
+    - kiosc-public
   restart: unless-stopped
   volumes:
     - type: bind
@@ -24,11 +24,12 @@ services:
       - "80:80"
       - "443:443"
     networks:
-      - kiosc
+      - kiosc-public
     restart: unless-stopped
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=kiosc-public"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
@@ -43,7 +44,7 @@ services:
   kiosc-web:
     <<: *default-kiosc
     networks:
-      - kiosc
+      - kiosc-public
     restart: unless-stopped
     depends_on:
       - postgres
@@ -61,7 +62,7 @@ services:
     <<: *default-kiosc
     command: ["celerybeat"]
     networks:
-      - kiosc
+      - kiosc-public
     depends_on:
       - kiosc-web
     restart: unless-stopped
@@ -76,7 +77,7 @@ services:
     depends_on:
       - kiosc-web
     networks:
-      - kiosc
+      - kiosc-public
     restart: unless-stopped
 
   postgres:
@@ -86,7 +87,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: kiosc
     networks:
-      - kiosc
+      - kiosc-public
     restart: unless-stopped
     volumes:
       - type: bind
@@ -96,7 +97,7 @@ services:
   redis:
     image: redis:6
     networks:
-      - kiosc
+      - kiosc-public
     restart: unless-stopped
     volumes:
       - type: bind
@@ -104,4 +105,4 @@ services:
         target: /data
 
 networks:
-  kiosc:
+  kiosc-public:
