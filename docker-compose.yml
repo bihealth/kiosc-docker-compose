@@ -106,3 +106,5 @@ services:
 
 networks:
   kiosc-public:
+    driver_opts:
+      com.docker.network.bridge.name: br-kiosc-public
