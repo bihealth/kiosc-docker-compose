@@ -1,6 +1,10 @@
+# NOTE
+
+This project is currently unmaintained.
+
 # Run Kiosc Server using Docker Compose
 
-- TODO
+TODO
 
 ## Quickstart
 
