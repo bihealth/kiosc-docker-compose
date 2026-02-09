@@ -88,6 +88,8 @@ services:
       POSTGRES_DB: kiosc
     networks:
       - kiosc-public
+    ports:
+      - "5432:5432"
     restart: unless-stopped
     volumes:
       - type: bind
