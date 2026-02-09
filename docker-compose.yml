@@ -1,5 +1,3 @@
-version: "3.8"
-
 # Define default configuration for Kiosc Servers.
 x-kiosc: &default-kiosc
   image: ghcr.io/bihealth/kiosc-server:${KIOSC_SERVER_VERSION}
