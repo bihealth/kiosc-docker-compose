@@ -14,10 +14,25 @@ $ git clone https://github.com/bihealth/kiosc-docker-compose.git
 $ cd kiosc-docker-compose
 $ bash init.sh
 $ cp env.example .env
-$ docker compose up
 ```
 
+### Run for Deployment or Evaluation
+
 Open `.env` and change `DJANGO_SECRET_KEY` if you run this in production.
+
+To bring up the network for deployment or evaluation:
+
+```
+$ docker compose --profile deploy up
+```
+
+### Run for Development
+
+This will run the database servers required by the Kiosc server. You are epxected to run the Kiosc Django server and required Celery processes locally.
+
+```
+$ docker compose --profile dev up
+```
 
 ## Upgrading
 
