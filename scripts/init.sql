@@ -1,0 +1,2 @@
+ALTER DATABASE kiosc OWNER TO kiosc;
+ALTER USER kiosc CREATEDB;
