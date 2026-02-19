@@ -14,3 +14,7 @@
 - Upgrade to PostgreSQL v16 (#8)
 - Upgrade to Redis v8 (#10)
 - Remove obsolete `version` attribute (#3)
+
+## v0.5-1
+
+Release for legacy versions of Kiosc Server up to v0.5.
