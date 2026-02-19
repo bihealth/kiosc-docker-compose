@@ -48,8 +48,16 @@ $ docker compose --profile dev up
 
 ## Upgrading
 
-### Unreleased
+### v0.6-1
+
+#### PostgreSQL Upgrade
 
 This release upgrades PostgreSQL from v12 to v16. If upgrading an existing Kiosc deployment, you **must** backup your database prior to upgrading and re-import it after upgrade is completed.
 
+#### Redis Upgrade
+
 Redis has been upgraded from v6 to v8. If you encounter problems with upgrading an existing network, delete existing data in `volumes/redis`.
+
+#### Kiosc Environment Variables
+
+Kiosc environment variables have been reorganized and in some cases renamed. You should review your existing setup to ensure settings are passed using the correct environment variables.
