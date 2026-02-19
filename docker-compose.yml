@@ -57,7 +57,7 @@ services:
         target: /data
 
   traefik:
-    image: traefik:v2.11
+    image: traefik:${TRAEFIK_VERSION-2.11}
     profiles: [deploy]
     ports:
       - "80:80"
