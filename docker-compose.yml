@@ -46,7 +46,7 @@ services:
       - "5432:5432"
 
   redis:
-    image: redis:6
+    image: redis:${REDIS_VERSION-8}
     profiles: [deploy, dev]
     networks:
       - kiosc-public
