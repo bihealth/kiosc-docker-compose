@@ -7,6 +7,7 @@
 - Add `deploy` and `dev` profiles (#7)
 - Add `REDIS_VERSION` env var (#10)
 - Add `TRAEFIK_VERSION` env var (#1)
+- Add `Makefile` targets `deploy` and `dev` (#12)
 - Expose PostgreSQL port in `dev` profile (#5)
 - Update examples for `docker compose` (#4)
 - Hardcode database host and user credentials (#6)

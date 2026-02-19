@@ -23,12 +23,24 @@ Open `.env` and change `DJANGO_SECRET_KEY` if you run this in production.
 To bring up the network for deployment or evaluation:
 
 ```
+$ make deploy
+```
+
+Alternatively:
+
+```
 $ docker compose --profile deploy up
 ```
 
 ### Run for Development
 
 This will run the database servers required by the Kiosc server. You are epxected to run the Kiosc Django server and required Celery processes locally.
+
+```
+$ make dev
+```
+
+Alternatively:
 
 ```
 $ docker compose --profile dev up
