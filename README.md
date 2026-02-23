@@ -48,7 +48,7 @@ $ docker compose --profile dev up
 
 ## Upgrading
 
-### v0.6-1
+### v0.5-1
 
 #### PostgreSQL Upgrade
 

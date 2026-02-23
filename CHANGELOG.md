@@ -18,6 +18,6 @@
 - Upgrade to Redis v8 (#10)
 - Remove obsolete `version` attribute (#3)
 
-## v0.5-1 (2026-02-19)
+## v0.4-legacy (2026-02-19)
 
-Release for legacy versions of Kiosc Server up to v0.5.
+Release for legacy versions of Kiosc Server up to v0.4.
