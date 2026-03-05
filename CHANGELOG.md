@@ -12,7 +12,7 @@
 - Expose PostgreSQL port in `dev` profile (#5)
 - Update examples for `docker compose` (#4)
 - Update database host and user credentials (#6)
-- Update Kiosc env vars (#11)
+- Update Kiosc env vars (#11, #15)
 - Upgrade to Traefik v2.11 (#1)
 - Upgrade to PostgreSQL v16 (#8)
 - Upgrade to Redis v8 (#10)
