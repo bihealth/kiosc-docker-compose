@@ -1,6 +1,6 @@
 # Changelog for kiosc-docker-compose
 
-## Unreleased
+## v0.5-1 (2026-03-13)
 
 - Add `NETWORK_BRIDGE_NAME` env var (#2)
 - Add database setup on init (#6)
