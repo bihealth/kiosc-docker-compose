@@ -21,7 +21,7 @@ x-postgres: &default-postgres
 x-kiosc: &default-kiosc
   image: ghcr.io/bihealth/kiosc-server:${KIOSC_SERVER_VERSION}
   environment: &default-kiosc-environment
-    WAIT_HOSTS: "postgres:5432, redis:6379"
+    WAIT_HOSTS: "postgres:5432,redis:6379"
     LC_ALL: en_US.UTF-8
     # Kiosc configuration
     DATABASE_URL: ${KIOSC_DATABASE_URL}
@@ -139,7 +139,7 @@ services:
         target: /data
 
   traefik:
-    image: traefik:${TRAEFIK_VERSION-2.11}
+    image: traefik:${TRAEFIK_VERSION-v3}
     profiles: [deploy]
     ports:
       - "80:80"
@@ -176,7 +176,7 @@ services:
       - "traefik.http.middlewares.xforward.headers.customrequestheaders.X-Forwarded-Proto=https"
       - "traefik.http.routers.kiosc-web.entrypoints=web,websecure"
       - "traefik.http.routers.kiosc-web.middlewares=xforward"
-      - "traefik.http.routers.kiosc-web.rule=HostRegexp(`{catchall:.+}`)"
+      - "traefik.http.routers.kiosc-web.rule=HostRegexp(`.+`)"
       - "traefik.http.services.kiosc-web.loadbalancer.server.port=8080"
       - "traefik.http.routers.kiosc-web.tls=true"
 
