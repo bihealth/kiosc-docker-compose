@@ -17,6 +17,23 @@ x-postgres: &default-postgres
       source: ./scripts/init.sql
       target: /docker-entrypoint-initdb.d/init.sql
 
+# Default configuration for Docker registry
+x-kiosc-registry: &default-registry
+  image: registry:3
+  container_name: kiosc-registry
+  restart: unless-stopped
+  environment: &default-registry-environment
+    REGISTRY_NOTIFICATIONS_ENDPOINTS_0_HEADERS_AUTHORIZATION: "[\"Bearer ${KIOSC_CUSTOM_REGISTRY_NOTIFICATIONS_TOKEN}\"]"
+    REGISTRY_HTTP_SECRET: ${KIOSC_CUSTOM_REGISTRY_HTTP_SECRET}
+  volumes:
+    - type: bind
+      source: /var/lib/docker/registry
+      target: /var/lib/registry
+    - type: bind
+      source: ./config/registry/config.yml
+      target: /etc/distribution/config.yml
+      read_only: true
+
 # Default configuration for Kiosc Servers
 x-kiosc: &default-kiosc
   image: ghcr.io/bihealth/kiosc-server:${KIOSC_SERVER_VERSION}
@@ -25,6 +42,7 @@ x-kiosc: &default-kiosc
     LC_ALL: en_US.UTF-8
     # Kiosc configuration
     DATABASE_URL: ${KIOSC_DATABASE_URL}
+    REDIS_URL: ${KIOSC_REDIS_URL}
     DJANGO_ALLOWED_HOSTS: ${KIOSC_DJANGO_ALLOWED_HOSTS}
     DJANGO_SECRET_KEY: ${KIOSC_DJANGO_SECRET_KEY}
     DJANGO_SETTINGS_MODULE: ${KIOSC_DJANGO_SETTINGS_MODULE}
@@ -34,6 +52,9 @@ x-kiosc: &default-kiosc
     KIOSC_DOCKER_WEB_SERVER: ${KIOSC_DOCKER_WEB_SERVER}
     KIOSC_EMBEDDED_FILES: ${KIOSC_EMBEDDED_FILES}
     KIOSC_NETWORK_MODE: ${KIOSC_NETWORK_MODE}
+    KIOSC_DATA_UPLOAD_MAX_MEMORY_SIZE: ${KIOSC_DATA_UPLOAD_MAX_MEMORY_SIZE}
+    KIOSC_CUSTOM_REGISTRY_URL: ${KIOSC_CUSTOM_REGISTRY_URL}
+    KIOSC_CUSTOM_REGISTRY_NOTIFICATIONS_TOKEN: ${KIOSC_CUSTOM_REGISTRY_NOTIFICATIONS_TOKEN}
     CELERY_BROKER_URL: ${KIOSC_CELERY_BROKER_URL}
     UVICORN_WORKERS: ${KIOSC_UVICORN_WORKERS}
     # LDAP auth
@@ -108,8 +129,6 @@ x-kiosc: &default-kiosc
     PROJECTROLES_TARGET_SYNC_INTERVAL: ${KIOSC_PROJECTROLES_TARGET_SYNC_INTERVAL}
   env_file:
     - .env
-  networks:
-    - kiosc-public
   restart: unless-stopped
   volumes:
     - type: bind
@@ -139,6 +158,17 @@ services:
         source: ./volumes/redis/data
         target: /data
 
+  kiosc-registry:
+    <<: *default-registry
+    environment:
+      <<: *default-registry-environment
+      REGISTRY_NOTIFICATIONS_ENDPOINTS_0_URL: "http://127.0.0.1:8080/containers/registry"
+    profiles: [deploy, dev]
+    ports:
+      - 5000:5000
+    networks:
+      - kiosc-public
+
   traefik:
     image: traefik:${TRAEFIK_VERSION-v3}
     profiles: [deploy]
@@ -166,8 +196,7 @@ services:
   kiosc-web:
     <<: *default-kiosc
     profiles: [deploy]
-    networks:
-      - kiosc-public
+    network_mode: service:kiosc-registry
     restart: unless-stopped
     depends_on:
       - postgres
@@ -184,9 +213,9 @@ services:
   kiosc-celerybeat:
     <<: *default-kiosc
     profiles: [deploy]
-    command: ["celerybeat"]
     networks:
       - kiosc-public
+    command: ["celerybeat"]
     depends_on:
       - kiosc-web
     restart: unless-stopped
@@ -194,6 +223,8 @@ services:
   kiosc-celeryd-default:
     <<: *default-kiosc
     profiles: [deploy]
+    networks:
+        - kiosc-public
     command: ["celeryd"]
     environment:
       <<: *default-kiosc-environment
@@ -201,8 +232,6 @@ services:
       CELERY_WORKERS: 16
     depends_on:
       - kiosc-web
-    networks:
-      - kiosc-public
     restart: unless-stopped
 
 networks:
