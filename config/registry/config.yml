@@ -1,0 +1,48 @@
+version: 0.1
+log:
+  accesslog:
+    disabled: false
+  # level: debug
+  formatter: text
+  fields:
+    service: registry
+storage:
+  cache:
+    blobdescriptor: inmemory
+  filesystem:
+    rootdirectory: /var/lib/registry
+  tag:
+    concurrencylimit: 8
+http:
+  addr: :5000
+  prefix: /
+  headers:
+    X-Content-Type-Options: [nosniff]
+  # This will be overwritten by an environment variable in docker compose
+  secret: kiosc-server
+  debug:
+    addr: :5001
+notifications:
+  events:
+    includereferences: false
+  endpoints:
+    - name: kiosc-web
+      disabled: false
+      url: http://127.0.0.1:8000/containers/registry
+      headers:
+        # This will be overwritten with an environment variable
+        # from the docker compose
+        authorization: ["Bearer REPLACEMEWITHASECRETTOKEN"]
+      timeout: 32s
+      threshold: 3
+      backoff: 4s
+      ignoredmediatypes:
+        - application/octet-stream
+      ignore:
+        mediatypes:
+           - application/octet-stream
+        actions:
+           - pull
+redis:
+  addrs: [redis:6379]
+  db: 0
