@@ -1,5 +1,22 @@
 # Changelog for kiosc-docker-compose
 
+## v0.5-5 (2026-06-18)
+
+- Bump Kiosc version (#22)
+- Update environment variables for compatibility with Kiosc v0.5.3 (#22)
+
+## v0.5-4 (2026-06-09)
+
+- Bump Kiosc version (#21)
+
+## v0.5-3 (2026-06-03)
+
+- Bump Kiosc version (#20)
+
+## v0.5-2 (2026-05-07)
+
+- Upgrade to Traefik v3 (#17)
+
 ## v0.5-1 (2026-03-13)
 
 - Add `NETWORK_BRIDGE_NAME` env var (#2)
