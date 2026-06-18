@@ -1,6 +1,6 @@
 # Changelog for kiosc-docker-compose
 
-## Current
+## v0.5-5 (2026-06-18)
 
 - Bump Kiosc version (#22)
 - Update environment variables for compatibility with Kiosc v0.5.3 (#22)
