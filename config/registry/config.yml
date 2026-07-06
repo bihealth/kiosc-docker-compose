@@ -2,7 +2,7 @@ version: 0.1
 log:
   accesslog:
     disabled: false
-  # level: debug
+  level: warn
   formatter: text
   fields:
     service: registry
@@ -20,15 +20,15 @@ http:
     X-Content-Type-Options: [nosniff]
   # This will be overwritten by an environment variable in docker compose
   secret: kiosc-server
-  debug:
-    addr: :5001
+  # debug:
+  #   addr: :5001
 notifications:
   events:
     includereferences: false
   endpoints:
     - name: kiosc-web
       disabled: false
-      url: http://127.0.0.1:8000/containers/registry
+      url: http://kiosc-web:8000/registry
       headers:
         # This will be overwritten with an environment variable
         # from the docker compose
