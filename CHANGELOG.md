@@ -1,5 +1,10 @@
 # Changelog for kiosc-docker-compose
 
+## v0.6-1 (2026-07-07)
+
+- Bump Kiosc version to v0.6.0
+- Add custom container registry (#19)
+
 ## v0.5-5 (2026-06-18)
 
 - Bump Kiosc version (#22)
