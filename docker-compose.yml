@@ -17,6 +17,35 @@ x-postgres: &default-postgres
       source: ./scripts/init.sql
       target: /docker-entrypoint-initdb.d/init.sql
 
+# Default configuration for redis
+x-redis: &default-redis
+  image: redis:${REDIS_VERSION-8}
+  networks:
+    - kiosc-public
+  restart: unless-stopped
+  volumes:
+    - type: bind
+      source: ./volumes/redis/data
+      target: /data
+
+# Default configuration for Docker registry
+x-kiosc-registry: &default-registry
+  image: registry:3
+  environment: &default-registry-environment
+    REGISTRY_HTTP_SECRET: ${KIOSC_CUSTOM_REGISTRY_HTTP_SECRET}
+    REGISTRY_NOTIFICATIONS_ENDPOINTS_0_HEADERS_AUTHORIZATION: "[\"Bearer ${KIOSC_CUSTOM_REGISTRY_NOTIFICATIONS_TOKEN}\"]"
+    REGISTRY_NOTIFICATIONS_ENDPOINTS_0_URL: "${KIOSC_CUSTOM_REGISTRY_NOTIFICATIONS_URL}"
+    REGISTRY_REDIS_ADDRS: "[${KIOSC_REDIS_URL}]"
+  restart: unless-stopped
+  volumes:
+    - type: bind
+      source: ./volumes/registry
+      target: /var/lib/registry
+    - type: bind
+      source: ./config/registry/config.yml
+      target: /etc/distribution/config.yml
+      read_only: true
+
 # Default configuration for Kiosc Servers
 x-kiosc: &default-kiosc
   image: ghcr.io/bihealth/kiosc-server:${KIOSC_SERVER_VERSION}
@@ -25,15 +54,19 @@ x-kiosc: &default-kiosc
     LC_ALL: en_US.UTF-8
     # Kiosc configuration
     DATABASE_URL: ${KIOSC_DATABASE_URL}
+    REDIS_URL: ${KIOSC_REDIS_URL}
     DJANGO_ALLOWED_HOSTS: ${KIOSC_DJANGO_ALLOWED_HOSTS}
     DJANGO_SECRET_KEY: ${KIOSC_DJANGO_SECRET_KEY}
     DJANGO_SETTINGS_MODULE: ${KIOSC_DJANGO_SETTINGS_MODULE}
     KIOSC_DOCKER_ACTION_MIN_DELAY: ${KIOSC_DOCKER_ACTION_MIN_DELAY}
     KIOSC_DOCKER_MAX_INACTIVITY: ${KIOSC_DOCKER_MAX_INACTIVITY}
     KIOSC_DOCKER_NETWORK: ${KIOSC_DOCKER_NETWORK}
-    KIOSC_DOCKER_WEB_SERVER: ${KIOSC_DOCKER_WEB_SERVER}
     KIOSC_EMBEDDED_FILES: ${KIOSC_EMBEDDED_FILES}
     KIOSC_NETWORK_MODE: ${KIOSC_NETWORK_MODE}
+    KIOSC_DATA_UPLOAD_MAX_MEMORY_SIZE: ${KIOSC_DATA_UPLOAD_MAX_MEMORY_SIZE}
+    KIOSC_CUSTOM_REGISTRY_HTTP_URL: ${KIOSC_CUSTOM_REGISTRY_HTTP_URL}
+    KIOSC_CUSTOM_REGISTRY_DOCKER_URL: ${KIOSC_CUSTOM_REGISTRY_DOCKER_URL}
+    KIOSC_CUSTOM_REGISTRY_NOTIFICATIONS_TOKEN: ${KIOSC_CUSTOM_REGISTRY_NOTIFICATIONS_TOKEN}
     CELERY_BROKER_URL: ${KIOSC_CELERY_BROKER_URL}
     UVICORN_WORKERS: ${KIOSC_UVICORN_WORKERS}
     # LDAP auth
@@ -129,15 +162,38 @@ services:
       - "5432:5432"
 
   redis:
-    image: redis:${REDIS_VERSION-8}
-    profiles: [deploy, dev]
+    <<: *default-redis
+    profiles: [deploy]
+
+  redis-dev:
+    <<: *default-redis
+    profiles: [dev]
+    ports:
+      - "6379:6379"
+
+  kiosc-registry:
+    <<: *default-registry
     networks:
       - kiosc-public
-    restart: unless-stopped
-    volumes:
-      - type: bind
-        source: ./volumes/redis/data
-        target: /data
+    ports:
+      - "5000:5000"
+    profiles: [deploy]
+    depends_on:
+      - redis
+
+  kiosc-registry-dev:
+    <<: *default-registry
+    environment:
+      <<: *default-registry-environment
+      REGISTRY_HTTP_DEBUG_ADDR: ":5001"
+      REGISTRY_LOG_LEVEL: "debug"
+    # Need to be in the host network in order to access the kiosc-web server
+    network_mode: host
+    extra_hosts:
+      - "kiosc-web:127.0.0.1"
+    profiles: [dev]
+    depends_on:
+      - redis-dev
 
   traefik:
     image: traefik:${TRAEFIK_VERSION-v3}
@@ -166,8 +222,6 @@ services:
   kiosc-web:
     <<: *default-kiosc
     profiles: [deploy]
-    networks:
-      - kiosc-public
     restart: unless-stopped
     depends_on:
       - postgres
@@ -178,15 +232,13 @@ services:
       - "traefik.http.routers.kiosc-web.entrypoints=web,websecure"
       - "traefik.http.routers.kiosc-web.middlewares=xforward"
       - "traefik.http.routers.kiosc-web.rule=HostRegexp(`.+`)"
-      - "traefik.http.services.kiosc-web.loadbalancer.server.port=8080"
+      - "traefik.http.services.kiosc-web.loadbalancer.server.port=8000"
       - "traefik.http.routers.kiosc-web.tls=true"
 
   kiosc-celerybeat:
     <<: *default-kiosc
     profiles: [deploy]
     command: ["celerybeat"]
-    networks:
-      - kiosc-public
     depends_on:
       - kiosc-web
     restart: unless-stopped
@@ -201,8 +253,6 @@ services:
       CELERY_WORKERS: 16
     depends_on:
       - kiosc-web
-    networks:
-      - kiosc-public
     restart: unless-stopped
 
 networks:
