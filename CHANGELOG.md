@@ -1,5 +1,11 @@
 # Changelog for kiosc-docker-compose
 
+## v0.6-2 (2026-08-07)
+
+- Change the mountpoint for the registry service to `/var/lib/docker/registry`
+- Bump Kiosc version to v0.6.1
+- Increase the default `KIOSC_DATA_UPLOAD_MAX_MEMORY_SIZE`
+
 ## v0.6-1 (2026-07-07)
 
 - Bump Kiosc version to v0.6.0
