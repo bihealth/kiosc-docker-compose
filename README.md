@@ -48,6 +48,16 @@ $ docker compose --profile dev up
 
 ## Upgrading
 
+### v0.6-1
+
+#### New registry service
+
+There is a new docker compose service for a container registry; it is configured via a mix of a yaml file (see `config/registry/config.yml`) and environment variables. Make sure that the values are appropriate for your setup. By default, the path `/var/lib/docker/registry` will be bind-mounted from the host to this service.
+
+#### Kiosc Environment Variables
+
+More environment variables have been added, review your setup and make sure to set all the relevant variables to appropriate values.
+
 ### v0.5-1
 
 #### PostgreSQL Upgrade

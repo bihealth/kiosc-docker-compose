@@ -39,7 +39,7 @@ x-kiosc-registry: &default-registry
   restart: unless-stopped
   volumes:
     - type: bind
-      source: ./volumes/registry
+      source: /var/lib/docker/registry
       target: /var/lib/registry
     - type: bind
       source: ./config/registry/config.yml
