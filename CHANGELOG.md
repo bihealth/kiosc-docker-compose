@@ -1,5 +1,10 @@
 # Changelog for kiosc-docker-compose
 
+## v0.6-3 (2026-08-31)
+
+- Add `KIOSC_DOCKER_VOLUMES_DIR` environment variable
+- Bump Kiosc version to v0.6.2
+
 ## v0.6-2 (2026-08-07)
 
 - Change the mountpoint for the registry service to `/var/lib/docker/registry`
