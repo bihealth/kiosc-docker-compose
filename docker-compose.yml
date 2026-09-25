@@ -150,6 +150,13 @@ x-kiosc: &default-kiosc
       source: /var/run/docker.sock
       target: /var/run/docker.sock
       read_only: false
+    - type: bind  # Template include dir
+      source: ./config/kiosc/templates
+      target: /usr/src/app/kiosc/templates/include
+    - type: bind
+      source: ${KIOSC_DOCKER_VOLUMES_DIR_SOURCE}
+      target: ${KIOSC_DOCKER_VOLUMES_DIR}
+      read_only: false
 
 services:
   postgres:

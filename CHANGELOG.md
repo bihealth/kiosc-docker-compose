@@ -3,7 +3,9 @@
 ## v0.6-3 (2026-08-31)
 
 - Add `KIOSC_DOCKER_VOLUMES_DIR` environment variable
-- Bump Kiosc version to v0.6.2
+- Bump Kiosc version to v0.6.2 (#28)
+- Fix email-related environment variables (#31)
+- Enable full login template override (#32)
 
 ## v0.6-2 (2026-08-07)
 
